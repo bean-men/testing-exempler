@@ -1,8 +1,7 @@
 name: Lint Check (pre-commit)
 
 on:
-  pull_request:
-  push:
+  pull_request_target:
 
 jobs:
   pre-commit:
@@ -23,19 +22,12 @@ jobs:
         with:
           python-version: 3.13
 
-      - name: Get Changed Files
-        id: changed-files
-        uses: tj-actions/changed-files@v45
-
         # See:
         # https://github.com/tj-actions/changed-files?tab=readme-ov-file#using-local-git-directory-
       - uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: --files ${{ steps.changed-files.outputs.all_changed_files }}
         continue-on-error: true
 
       - name: suggester / pre-commit
-        if: ${{ github.event_name == 'pull_request' }}
         uses: reviewdog/action-suggester@v1
         with:
           tool_name: pre-commit
