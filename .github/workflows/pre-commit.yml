@@ -2,7 +2,6 @@ name: Lint Check (pre-commit)
 
 on:
   pull_request_target:
-  push:
 
 jobs:
   pre-commit:
@@ -35,7 +34,6 @@ jobs:
         continue-on-error: true
 
       - name: suggester / pre-commit
-        if: ${{ github.event_name == 'pull_request' }}
         uses: reviewdog/action-suggester@v1
         with:
           tool_name: pre-commit
