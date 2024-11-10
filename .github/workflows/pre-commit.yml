@@ -2,6 +2,7 @@ name: Lint Check (pre-commit)
 
 on:
   pull_request_target:
+  push:
 
 jobs:
   pre-commit:
@@ -14,21 +15,37 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository  
         uses: actions/checkout@v4
+
+      - name: Checkout pr
+        run: |
+          gh auth login --with-token <<< "$GITHUB_TOKEN"
+          gh pr checkout ${{ github.event.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.13
 
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+
         # See:
         # https://github.com/tj-actions/changed-files?tab=readme-ov-file#using-local-git-directory-
       - uses: pre-commit/action@v3.0.1
-        continue-on-error: true
+        id: run-pre-commit
+        with:
+          extra_args: --files ${{ steps.changed-files.outputs.all_changed_files }}
 
+        # Review dog posts the suggested change from pre-commit to the pr.
       - name: suggester / pre-commit
         uses: reviewdog/action-suggester@v1
+        # Run review dog only on PRs and only when pre-commit fails
+        if: ${{ github.event_name == 'pull_request_target' && failure() && steps.run-pre-commit.conclusion == 'failure' }}
         with:
           tool_name: pre-commit
           level: warning
