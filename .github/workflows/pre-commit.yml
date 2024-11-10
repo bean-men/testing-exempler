@@ -19,9 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Checkout pr
-        run: |
-          gh auth login --with-token <<< "$GITHUB_TOKEN"
-          gh pr checkout ${{ github.event.number }}
+        run: gh pr checkout ${{ github.event.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
 
